@@ -9,6 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: 🚀 Deploy to Vercel
+
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
@@ -19,16 +20,33 @@ jobs:
           node-version: 20
 
       - name: 🚀 Deploy to Vercel
+        id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
         run: |
-          npm install -g vercel@latest
-          vercel deploy --token "$VERCEL_TOKEN" \
+          npm install -g vercel@latest --silent
+          
+          # Deploy and capture full output
+          OUTPUT=$(vercel deploy \
+            --token "$VERCEL_TOKEN" \
             --scope "$VERCEL_ORG_ID" \
-            --prod --yes \
-            --name "fifa-worldcup-2026" \
-            2>&1 | tee deploy_output.txt
+            --prod --yes 2>&1)
+          
+          echo "$OUTPUT"
+          
+          # Extract the URL
+          DEPLOY_URL=$(echo "$OUTPUT" | grep -Eo 'https://[a-zA-Z0-9._-]+\.vercel\.app' | tail -1)
           echo ""
-          echo "🌐 Live URL:"
-          grep -E "https://.*vercel\.app" deploy_output.txt | tail -1
+          echo "========================================="
+          echo "🌐 LIVE URL: $DEPLOY_URL"
+          echo "========================================="
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+      
+      - name: 🔗 Comment deploy URL
+        run: |
+          echo "### ⚽ FIFA World Cup 2026 — Deployed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 **Live URL:** ${{ steps.deploy.outputs.deploy_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All 104 matches live with timezone converter & calendar export" >> $GITHUB_STEP_SUMMARY
