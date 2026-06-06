@@ -14,39 +14,11 @@ jobs:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: 🚀 Deploy to Vercel
-        id: deploy
-        env:
+        uses: BetaHuhn/deploy-to-vercel-action@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        run: |
-          npm install -g vercel@latest --silent
-          
-          # Deploy and capture full output
-          OUTPUT=$(vercel deploy \
-            --token "$VERCEL_TOKEN" \
-            --scope "$VERCEL_ORG_ID" \
-            --prod --yes 2>&1)
-          
-          echo "$OUTPUT"
-          
-          # Extract the URL
-          DEPLOY_URL=$(echo "$OUTPUT" | grep -Eo 'https://[a-zA-Z0-9._-]+\.vercel\.app' | tail -1)
-          echo ""
-          echo "========================================="
-          echo "🌐 LIVE URL: $DEPLOY_URL"
-          echo "========================================="
-          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
-      
-      - name: 🔗 Comment deploy URL
-        run: |
-          echo "### ⚽ FIFA World Cup 2026 — Deployed!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🌐 **Live URL:** ${{ steps.deploy.outputs.deploy_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ All 104 matches live with timezone converter & calendar export" >> $GITHUB_STEP_SUMMARY
+          PRODUCTION: true
+          CREATE_COMMENT: false
