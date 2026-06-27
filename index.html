@@ -399,6 +399,7 @@ footer{background:var(--card);border-top:1px solid var(--border);padding:2rem;te
       <span class="tzl">🌍 Timezone</span>
       <select class="tzs" id="tzSelect" onchange="renderSchedule()"></select>
       <span class="tzc" id="tzClock"></span>
+      <button class="cbtn cba" id="refreshScoresBtn" onclick="manualRefreshScores()" style="padding:.4rem .9rem">🔄 Refresh Scores</button>
     </div>
     <div class="fb-bar">
       <input class="srch" type="text" placeholder="🔍 Search team or city…" id="searchInput" oninput="renderSchedule()">
@@ -750,7 +751,7 @@ let SCORES={}; // { matchId: {status:'finished'|'live', home:N, away:N, minute:'
 // ── SCORES (fetched from scores.json, lives next to index.html) ──
 async function loadScores(){
   try{
-    const res=await fetch('scores.json',{cache:'no-store'});
+    const res=await fetch('scores.json?v='+Date.now(),{cache:'no-store'});
     if(!res.ok)return;
     const data=await res.json();
     SCORES=data.results||{};
@@ -758,6 +759,17 @@ async function loadScores(){
 }
 
 function scoreFor(id){ return SCORES[String(id)]||null; }
+
+async function manualRefreshScores(){
+  const btn=document.getElementById('refreshScoresBtn');
+  if(btn){btn.textContent='⏳ Refreshing…';btn.disabled=true;}
+  await loadScores();
+  renderSchedule();
+  if(document.getElementById('tab-knockout').classList.contains('active'))renderKnockout();
+  if(btn){btn.textContent='🔄 Refresh Scores';btn.disabled=false;}
+  const count=Object.keys(SCORES).length;
+  toast(count>0?`✅ Loaded ${count} match result${count===1?'':'s'}`:'⚠️ No scores found in scores.json');
+}
 
 window.addEventListener('DOMContentLoaded',async()=>{
   buildTZSelect();
