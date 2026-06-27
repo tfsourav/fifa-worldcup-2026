@@ -1,0 +1,43 @@
+name: 🏆 Deploy FIFA World Cup 2026 (beta)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: 🚀 Deploy to Vercel (fifa-worldcup-2026-beta)
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 🔗 Link Vercel project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: |
+          npm install -g vercel@latest --silent
+          mkdir -p .vercel
+          cat > .vercel/project.json << JSON
+          {"projectId":null,"orgId":"$VERCEL_ORG_ID","settings":{}}
+          JSON
+          vercel link --token "$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID" --yes --project fifa-worldcup-2026-beta
+
+      - name: 🚀 Deploy to Vercel
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: |
+          OUTPUT=$(vercel deploy --token "$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID" --prod --yes 2>&1)
+          echo "$OUTPUT"
+          DEPLOY_URL=$(echo "$OUTPUT" | grep -Eo 'https://[a-zA-Z0-9._-]+\.vercel\.app' | tail -1)
+          echo "### ⚽ Deployed!" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 **URL:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
