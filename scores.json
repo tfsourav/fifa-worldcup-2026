@@ -1,8 +1,318 @@
 {
   "_readme": "Add a result using the match id (see index.html MATCHES array for ids 1-104). status: 'finished' or 'live'. Just edit this file and push to update the live site.",
   "_example": {
-    "1": { "status": "finished", "home": 2, "away": 0 },
-    "6": { "status": "live", "home": 1, "away": 1, "minute": "67'" }
+    "1": {
+      "status": "finished",
+      "home": 2,
+      "away": 0
+    },
+    "6": {
+      "status": "live",
+      "home": 1,
+      "away": 1,
+      "minute": "67'"
+    }
   },
-  "results": {}
+  "results": {
+    "1": {
+      "status": "finished",
+      "home": 2,
+      "away": 0
+    },
+    "2": {
+      "status": "finished",
+      "home": 2,
+      "away": 1
+    },
+    "3": {
+      "status": "finished",
+      "home": 1,
+      "away": 1
+    },
+    "4": {
+      "status": "finished",
+      "home": 4,
+      "away": 1
+    },
+    "5": {
+      "status": "finished",
+      "home": 1,
+      "away": 1
+    },
+    "6": {
+      "status": "finished",
+      "home": 1,
+      "away": 1
+    },
+    "7": {
+      "status": "finished",
+      "home": 0,
+      "away": 1
+    },
+    "8": {
+      "status": "finished",
+      "home": 2,
+      "away": 0
+    },
+    "9": {
+      "status": "finished",
+      "home": 7,
+      "away": 1
+    },
+    "10": {
+      "status": "finished",
+      "home": 2,
+      "away": 2
+    },
+    "11": {
+      "status": "finished",
+      "home": 1,
+      "away": 0
+    },
+    "12": {
+      "status": "finished",
+      "home": 5,
+      "away": 1
+    },
+    "13": {
+      "status": "finished",
+      "home": 0,
+      "away": 0
+    },
+    "14": {
+      "status": "finished",
+      "home": 1,
+      "away": 1
+    },
+    "15": {
+      "status": "finished",
+      "home": 1,
+      "away": 1
+    },
+    "16": {
+      "status": "finished",
+      "home": 2,
+      "away": 2
+    },
+    "17": {
+      "status": "finished",
+      "home": 3,
+      "away": 1
+    },
+    "18": {
+      "status": "finished",
+      "home": 1,
+      "away": 4
+    },
+    "19": {
+      "status": "finished",
+      "home": 3,
+      "away": 0
+    },
+    "20": {
+      "status": "finished",
+      "home": 3,
+      "away": 1
+    },
+    "21": {
+      "status": "finished",
+      "home": 1,
+      "away": 1
+    },
+    "22": {
+      "status": "finished",
+      "home": 4,
+      "away": 2
+    },
+    "23": {
+      "status": "finished",
+      "home": 1,
+      "away": 0
+    },
+    "24": {
+      "status": "finished",
+      "home": 1,
+      "away": 3
+    },
+    "25": {
+      "status": "finished",
+      "home": 1,
+      "away": 1
+    },
+    "26": {
+      "status": "finished",
+      "home": 4,
+      "away": 1
+    },
+    "27": {
+      "status": "finished",
+      "home": 6,
+      "away": 0
+    },
+    "28": {
+      "status": "finished",
+      "home": 1,
+      "away": 0
+    },
+    "29": {
+      "status": "finished",
+      "home": 2,
+      "away": 0
+    },
+    "30": {
+      "status": "finished",
+      "home": 0,
+      "away": 1
+    },
+    "31": {
+      "status": "finished",
+      "home": 3,
+      "away": 0
+    },
+    "32": {
+      "status": "finished",
+      "home": 0,
+      "away": 1
+    },
+    "33": {
+      "status": "finished",
+      "home": 5,
+      "away": 1
+    },
+    "34": {
+      "status": "finished",
+      "home": 2,
+      "away": 1
+    },
+    "35": {
+      "status": "finished",
+      "home": 0,
+      "away": 0
+    },
+    "36": {
+      "status": "finished",
+      "home": 0,
+      "away": 4
+    },
+    "37": {
+      "status": "finished",
+      "home": 4,
+      "away": 0
+    },
+    "38": {
+      "status": "finished",
+      "home": 0,
+      "away": 0
+    },
+    "39": {
+      "status": "finished",
+      "home": 2,
+      "away": 2
+    },
+    "40": {
+      "status": "finished",
+      "home": 1,
+      "away": 3
+    },
+    "41": {
+      "status": "finished",
+      "home": 2,
+      "away": 0
+    },
+    "42": {
+      "status": "finished",
+      "home": 3,
+      "away": 0
+    },
+    "43": {
+      "status": "finished",
+      "home": 3,
+      "away": 2
+    },
+    "44": {
+      "status": "finished",
+      "home": 1,
+      "away": 2
+    },
+    "45": {
+      "status": "finished",
+      "home": 5,
+      "away": 0
+    },
+    "46": {
+      "status": "finished",
+      "home": 0,
+      "away": 0
+    },
+    "47": {
+      "status": "finished",
+      "home": 0,
+      "away": 1
+    },
+    "48": {
+      "status": "finished",
+      "home": 1,
+      "away": 0
+    },
+    "49": {
+      "status": "finished",
+      "home": 2,
+      "away": 1
+    },
+    "50": {
+      "status": "finished",
+      "home": 3,
+      "away": 1
+    },
+    "51": {
+      "status": "finished",
+      "home": 0,
+      "away": 3
+    },
+    "52": {
+      "status": "finished",
+      "home": 4,
+      "away": 2
+    },
+    "53": {
+      "status": "finished",
+      "home": 0,
+      "away": 3
+    },
+    "54": {
+      "status": "finished",
+      "home": 1,
+      "away": 0
+    },
+    "55": {
+      "status": "finished",
+      "home": 0,
+      "away": 2
+    },
+    "56": {
+      "status": "finished",
+      "home": 2,
+      "away": 1
+    },
+    "57": {
+      "status": "finished",
+      "home": 1,
+      "away": 1
+    },
+    "58": {
+      "status": "finished",
+      "home": 1,
+      "away": 3
+    },
+    "59": {
+      "status": "finished",
+      "home": 3,
+      "away": 2
+    },
+    "60": {
+      "status": "finished",
+      "home": 0,
+      "away": 0
+    }
+  }
 }
