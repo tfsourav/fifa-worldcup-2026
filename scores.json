@@ -1,0 +1,8 @@
+{
+  "_readme": "Add a result using the match id (see index.html MATCHES array for ids 1-104). status: 'finished' or 'live'. Just edit this file and push to update the live site.",
+  "_example": {
+    "1": { "status": "finished", "home": 2, "away": 0 },
+    "6": { "status": "live", "home": 1, "away": 1, "minute": "67'" }
+  },
+  "results": {}
+}

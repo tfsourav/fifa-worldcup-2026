@@ -162,6 +162,20 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);over
 .cba:hover{background:rgba(255,255,255,.16)}
 .tbd{display:inline-flex;align-items:center;gap:.22rem;background:rgba(255,215,0,.09);border:1px solid rgba(255,215,0,.2);border-radius:5px;padding:.1rem .42rem;font-size:.6rem;font-weight:700;color:var(--gold);letter-spacing:.05em;margin-top:.2rem}
 
+/* ─── SCORECARD ─── */
+.mc.is-finished{border-color:rgba(0,230,118,.22);background:linear-gradient(135deg,rgba(0,230,118,.05),rgba(0,119,255,.03))}
+.mc.is-live{border-color:rgba(255,45,85,.4);animation:liveGlow 1.8s ease-in-out infinite}
+@keyframes liveGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,45,85,.25)}50%{box-shadow:0 0 0 6px rgba(255,45,85,0)}}
+.score-row{display:flex;align-items:center;justify-content:center;gap:.5rem;margin:.1rem 0}
+.score-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:var(--text)}
+.score-num.winner{color:var(--gold);text-shadow:0 0 16px rgba(255,215,0,.35)}
+.score-sep{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--dim);opacity:.5}
+.ft-badge{display:inline-flex;align-items:center;gap:.25rem;background:rgba(0,230,118,.14);border:1px solid rgba(0,230,118,.3);color:#00E676;font-size:.6rem;font-weight:800;letter-spacing:.08em;padding:.12rem .46rem;border-radius:5px;margin-bottom:.2rem}
+.live-badge{display:inline-flex;align-items:center;gap:.3rem;background:rgba(255,45,85,.16);border:1px solid rgba(255,45,85,.4);color:#FF2D55;font-size:.6rem;font-weight:800;letter-spacing:.08em;padding:.12rem .5rem;border-radius:5px;margin-bottom:.2rem}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#FF2D55;animation:livePulse 1.2s ease-in-out infinite}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+.live-min{font-size:.62rem;color:var(--dim);font-weight:700}
+
 /* ─── GROUPS ─── */
 .gg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem}
 .gc{background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--border);transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;animation:cIn .3s ease both}
@@ -395,6 +409,7 @@ footer{background:var(--card);border-top:1px solid var(--border);padding:2rem;te
       <button class="flt" onclick="setFilter('Quarterfinal',this)">QF</button>
       <button class="flt" onclick="setFilter('Semifinal',this)">SF</button>
       <button class="flt" onclick="setFilter('Final',this)">Final</button>
+      <button class="flt" onclick="setFilter('__results',this)">📊 Results</button>
     </div>
     <div id="scheduleContainer"></div>
   </div>
@@ -730,9 +745,23 @@ let currentFilter='all';
 let prevCD={d:null,h:null,m:null,s:null};
 let userTZ='UTC';
 try{userTZ=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'}catch(e){}
+let SCORES={}; // { matchId: {status:'finished'|'live', home:N, away:N, minute:'..'} }
 
-window.addEventListener('DOMContentLoaded',()=>{
+// ── SCORES (fetched from scores.json, lives next to index.html) ──
+async function loadScores(){
+  try{
+    const res=await fetch('scores.json',{cache:'no-store'});
+    if(!res.ok)return;
+    const data=await res.json();
+    SCORES=data.results||{};
+  }catch(e){ /* no scores yet — fine, everything just shows as upcoming */ }
+}
+
+function scoreFor(id){ return SCORES[String(id)]||null; }
+
+window.addEventListener('DOMContentLoaded',async()=>{
   buildTZSelect();
+  await loadScores();
   // Render groups immediately (fast innerHTML)
   renderGroups();
   renderPlayers();
@@ -744,6 +773,12 @@ window.addEventListener('DOMContentLoaded',()=>{
   startCountdown();
   updateClock();
   setInterval(updateClock,15000);
+  // Re-check for new scores every 60s — picks up finished/live matches without reload
+  setInterval(async()=>{
+    await loadScores();
+    renderSchedule();
+    if(document.getElementById('tab-knockout').classList.contains('active'))renderKnockout();
+  },60000);
   launchFloatingEmojis();
   setTimeout(launchConfetti,700);
 });
@@ -835,12 +870,40 @@ function stageBg(s){return{'Group Stage':'rgba(255,255,255,.07)','Round of 32':'
 function stageFg(s){return{'Group Stage':'rgba(255,255,255,.5)','Round of 32':'#4FC3F7','Round of 16':'#CE93D8','Quarterfinal':'#FF9147','Semifinal':'#FFD700','Third Place':'#C9A227','Final':'#FFD700'}[s]||'#aaa'}
 function isTBD(t){return t.startsWith('W-')||t.startsWith('L-')||t.startsWith('Runner')||t.startsWith('Winner')||t.startsWith('Best')}
 
+// Renders the middle section of a match card: live score, final score, or upcoming kickoff time
+function renderMatchCenter(m,tz,gl){
+  const sc=scoreFor(m.id);
+  if(sc&&sc.status==='finished'){
+    const hWin=sc.home>sc.away, aWin=sc.away>sc.home;
+    return `<span class="ft-badge">✅ FULL TIME</span>
+      <div class="score-row">
+        <span class="score-num${hWin?' winner':''}">${sc.home}</span>
+        <span class="score-sep">–</span>
+        <span class="score-num${aWin?' winner':''}">${sc.away}</span>
+      </div>
+      <div class="mv"><strong>${m.venue}</strong>${m.city} · ${fmtShort(m.utc,tz)}</div>`;
+  }
+  if(sc&&sc.status==='live'){
+    return `<span class="live-badge"><span class="live-dot"></span> LIVE${sc.minute?' · '+sc.minute:''}</span>
+      <div class="score-row">
+        <span class="score-num">${sc.home}</span>
+        <span class="score-sep">–</span>
+        <span class="score-num">${sc.away}</span>
+      </div>
+      <div class="mv"><strong>${m.venue}</strong>${m.city}</div>`;
+  }
+  return `<span class="msbadge" style="background:${stageBg(m.s)};color:${stageFg(m.s)}">${gl}</span>
+    <span class="mtime">${fmtTime(m.utc,tz)}</span>
+    <div class="mv"><strong>${m.venue}</strong>${m.city} · ${fmtShort(m.utc,tz)}</div>`;
+}
+
 // ── RENDER SCHEDULE (fast innerHTML) ──
 function renderSchedule(){
   const tz=getTZ();
   const q=document.getElementById('searchInput').value.toLowerCase().trim();
   updateClock();
   const list=MATCHES.filter(m=>{
+    if(currentFilter==='__results')return !!scoreFor(m.id);
     if(currentFilter!=='all'&&m.s!==currentFilter)return false;
     if(q&&!m.home.toLowerCase().includes(q)&&!m.away.toLowerCase().includes(q)&&!m.city.toLowerCase().includes(q))return false;
     return true;
@@ -859,12 +922,12 @@ function renderSchedule(){
       const gl=m.g.length<=1?'Group '+m.g:m.s;
       const htbd=isTBD(m.home)?'<span class="tbd">🎯 TBD</span>':'';
       const atbd=isTBD(m.away)?'<span class="tbd">🎯 TBD</span>':'';
-      return `<div class="mc" data-g="${m.g}">
+      const sc=scoreFor(m.id);
+      const statusClass=sc?(sc.status==='finished'?' is-finished':sc.status==='live'?' is-live':''):'';
+      return `<div class="mc${statusClass}" data-g="${m.g}">
         <div class="tside"><span class="tf">${m.hf}</span><div><div class="tn">${m.home}</div>${htbd}</div></div>
         <div class="mct">
-          <span class="msbadge" style="background:${stageBg(m.s)};color:${stageFg(m.s)}">${gl}</span>
-          <span class="mtime">${fmtTime(m.utc,tz)}</span>
-          <div class="mv"><strong>${m.venue}</strong>${m.city} · ${fmtShort(m.utc,tz)}</div>
+          ${renderMatchCenter(m,tz,gl)}
           <div class="mactions">
             <button class="cbtn cbg" onclick="copyGcal(${m.id})">📅 Google Cal</button>
             <button class="cbtn cba" onclick="downloadICS(${m.id})">${APPLE_SVG} Apple Cal</button>
@@ -971,8 +1034,16 @@ function renderKnockout(){
         <span style="font-size:1.5rem">${stage.i}</span>
         <div><span style="color:${stage.c}">${stage.n}</span><div class="kshn">${stage.note}</div></div>
       </div>
-      <div class="kmg">${ms.map(m=>`
-        <div class="km">
+      <div class="kmg">${ms.map(m=>{
+        const sc=scoreFor(m.id);
+        const statusClass=sc?(sc.status==='finished'?' is-finished':sc.status==='live'?' is-live':''):'';
+        const kmTime=sc&&sc.status==='finished'
+          ? `<div class="ft-badge" style="margin:0 0 .3rem">✅ FT</div><div class="score-row" style="margin:0"><span class="score-num" style="font-size:1.3rem">${sc.home}</span><span class="score-sep" style="font-size:1rem">–</span><span class="score-num" style="font-size:1.3rem">${sc.away}</span></div>`
+          : sc&&sc.status==='live'
+          ? `<div class="live-badge" style="margin:0 0 .3rem"><span class="live-dot"></span> LIVE</div><div class="score-row" style="margin:0"><span class="score-num" style="font-size:1.3rem">${sc.home}</span><span class="score-sep" style="font-size:1rem">–</span><span class="score-num" style="font-size:1.3rem">${sc.away}</span></div>`
+          : `<div class="ktm">${fmtTime(m.utc,tz)}</div><div>${fmtShort(m.utc,tz)}</div><div>${m.city.split(',')[0]}</div>`;
+        return `
+        <div class="km${statusClass}">
           <div style="flex:1;min-width:0">
             <div class="km-t"><span>${m.hf}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.home}</span></div>
             <div style="font-size:.65rem;color:var(--dim);margin:.22rem 0 .22rem .15rem">vs</div>
@@ -982,8 +1053,9 @@ function renderKnockout(){
               <button class="cbtn cba" style="font-size:.6rem;padding:.2rem .52rem" onclick="downloadICS(${m.id})">${APPLE_SVG} Apple</button>
             </div>
           </div>
-          <div class="km-time"><div class="ktm">${fmtTime(m.utc,tz)}</div><div>${fmtShort(m.utc,tz)}</div><div>${m.city.split(',')[0]}</div></div>
-        </div>`).join('')}
+          <div class="km-time">${kmTime}</div>
+        </div>`;
+      }).join('')}
       </div>
     </div>`;
   }).join('');
